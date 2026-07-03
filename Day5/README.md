@@ -836,3 +836,14 @@ oc start-build bc/java-app-pipeline
 
 oc logs -f bc/java-app-pipeline 
 ```
+
+## Post Assessment Link: 
+<pre>
+https://forms.office.com/r/1rPS5ipKVp
+</pre>
+
+## Feedback Link
+<pre>
+https://forms.office.com/r/JvCNADJ8BN
+</pre>
+ 
