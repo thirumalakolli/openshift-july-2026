@@ -764,6 +764,11 @@ oc expose svc/nginx
 oc get route
 ```
 
+We need to stree the pod with more traffic
+```
+ab -k -n 200000 -c 1000 https://nginx-jegan.apps.ocp4.palmeto.org/
+```
+
 ## Info - Openshift Network Model
 <pre>
 - Openshift's network operates in layers
@@ -812,7 +817,4 @@ oc get route
   - Outbound traffic appears to come from the cluster, not from individual pods
 </pre>
 
-We need to stree the pod with more traffic
-```
-ab -k -n 200000 -c 1000 https://nginx-jegan.apps.ocp4.palmeto.org/
-```
+
