@@ -228,7 +228,56 @@
 - Jenkins has over 10000+ active opensource contributors around the globe
 </pre>
 
-## Info - Subnet
+
+## Info - Openshift Network Model
+<pre>
+- Openshift's network operates in layers
+- It is important to understand how traffic flows through each layers for debugging & troubleshooting
+- Core Concepts
+  1. Container Network Interface (CNI)
+  2. Pod to Pod Communication
+  3. Services and Load Balancing
+</pre>
+
+#### Container Network Interace (CNI)
+<pre>
+- Openshift uses a CNI plugin to handle pod networking
+- the default is OVN-Kubernetes ( Openshift Virtual Network)
+- OVN creates a virtual network overlay where every pod gets a real, routable IP address
+  from the cluster subnet
+</pre>
+
+#### Pod to Pod Communication
+<pre>
+- When a Pod A sends traffic to Pod B, OVN handles the routing without needing kube-proxy
+- Packets flow through the overlay network
+- Both pods live on the same logical network namesapces, if even if they are on different nodes
+- The network plugin encapsulates packets and routes them to the correct node
+</pre>
+
+#### Services and Load Balancing
+<pre>
+- Services abstract pods IP addresses as Pod IPs are ephemeral
+- When you create a service, it gets a stable cluster IP
+- The kube-proxy watches endpoints and programs iptable rules on every node
+- The rules use DNAT with random probability-weighted distribution for new connections
+- each new connection picks a backend pod randomly according to their weights
+- Pod to Pod communication via Internal Service
+  - Pod A queries the service DNS name, gets resolved to cluster IP 
+  - Packtet hits a nodes's iptable rules
+  - DNAT rewrites the destination to a real Pod IP
+  - OVN routes to the target node and pod
+- Pod to Pod communication via External Route
+  - Uses Route or Ingress object
+  - Route creates a HAProxy rule on the ingress controller pods
+  - Traffic lands on the Ingress controller, which forwards to the service
+  - service load balancing takes over from there
+- Egress ( pod to external traffic )
+  - Pods use their Node's IP aas source 
+  - Outbound traffic appears to come from the cluster, not from individual pods
+</pre>
+
+#### Info - Subnet
 <pre>
 - Range of IP address
 - a bigger network is broken down to small network called subnet to apply different security policy or access
@@ -247,7 +296,7 @@
   - How many IP addresses are there in 10.131.0.0/24 - 256 IP addresses are there
 </pre>
 
-## Flannel Network Model
+#### Flannel Network Model
 <pre>
 Flannel is a simple and easy way to configure a layer 3 network fabric designed for Kubernetes. 
 It provides networking for container clusters by creating a virtual network that spans across all nodes.
@@ -491,7 +540,7 @@ The ICMP reply follows the reverse path:
 # 15:30:45.123490 IP 10.244.2.10 > 10.244.1.10: ICMP echo reply, id 1234, seq 1
 ```
 
-## Info - Calico Openshift Network Plugin
+#### Info - Calico Openshift Network Plugin
 <pre>
 - Calico Network in OpenShift
 - Calico is a popular Container Network Interface (CNI) plugin that provides networking and 
@@ -566,7 +615,7 @@ Comparison
 +------------------+----------+---------------+----------------+  
 </pre>
 
-## Info - Openshift Weave Network Plugin
+#### Info - Openshift Weave Network Plugin
 <pre>
 - Weave Network Plugin in OpenShift
   - Weave Network (Weave Net) is a Container Network Interface (CNI) plugin that 
@@ -631,47 +680,7 @@ Architecture Components
   network policies are required.
 </pre>
   
-<pre>
-+------------------------+---------------------------+---------------------------+
-| Feature                | Weave Network             | OpenShift SDN             |
-+------------------------+---------------------------+---------------------------+
-| Overlay Technology     | VXLAN/UDP                 | VXLAN                     |
-+------------------------+---------------------------+---------------------------+
-| Network Policies       | Full NetworkPolicy        | Limited (requires         |
-|                        | support                   | OVN-Kubernetes)           |
-+------------------------+---------------------------+---------------------------+
-| Encryption             | Built-in optional         | Requires additional       |
-|                        | encryption                | setup                     |
-+------------------------+---------------------------+---------------------------+
-| Performance            | Good, with encryption     | Optimized for OpenShift   |
-|                        | overhead                  |                           |
-+------------------------+---------------------------+---------------------------+
-| Setup Complexity       | More complex setup        | Integrated, simpler       |
-+------------------------+---------------------------+---------------------------+
-| IP Address Management  | Distributed IPAM          | Centralized IPAM          |
-+------------------------+---------------------------+---------------------------+
-| Service Discovery      | Built-in DNS              | Standard Kubernetes DNS   |
-+------------------------+---------------------------+---------------------------+
-| Multi-tenancy          | Network segmentation      | Project-based isolation   |
-+------------------------+---------------------------+---------------------------+
-| Troubleshooting        | More complex due to       | Easier with OpenShift     |
-|                        | overlay networking        | tooling                   |
-+------------------------+---------------------------+---------------------------+
-| Resource Consumption   | Higher (additional        | Lower (integrated)        |
-|                        | components)               |                           |
-+------------------------+---------------------------+---------------------------+
-| Cross-cluster          | Native support            | Requires additional       |
-| Communication          |                           | configuration             |
-+------------------------+---------------------------+---------------------------+
-| Monitoring & Logging   | External tools required   | Integrated with           |
-|                        |                           | OpenShift monitoring      |
-+------------------------+---------------------------+---------------------------+
-| Support & Maintenance  | Community/Commercial      | Red Hat supported         |
-|                        | support                   |                           |
-+------------------------+---------------------------+---------------------------+
-</pre>
-
-## Flannel vs Calico vs Weave
+### Flannel vs Calico vs Weave
 <pre>
 +------------------------+---------------------------+---------------------------+---------------------------+
 | Feature                | Calico                    | Flannel                   | Weave                     |
@@ -753,7 +762,7 @@ oc new-project jegan
 
 cd ~
 git clone https://github.com/tektutor/openshift-july-2026.git
-cd openshift-june-2026
+cd openshift-july-2026
 cd Day5/auto-scaling
 oc create -f hello-deploy.yml --save-config=true
 oc get pods
@@ -768,53 +777,5 @@ We need to stree the pod with more traffic
 ```
 ab -k -n 200000 -c 1000 https://nginx-jegan.apps.ocp4.palmeto.org/
 ```
-
-## Info - Openshift Network Model
-<pre>
-- Openshift's network operates in layers
-- It is important to understand how traffic flows through each layers for debugging & troubleshooting
-- Core Concepts
-  1. Container Network Interface (CNI)
-  2. Pod to Pod Communication
-  3. Services and Load Balancing
-</pre>
-
-#### Container Network Interace (CNI)
-<pre>
-- Openshift uses a CNI plugin to handle pod networking
-- the default is OVN-Kubernetes ( Openshift Virtual Network)
-- OVN creates a virtual network overlay where every pod gets a real, routable IP address
-  from the cluster subnet
-</pre>
-
-#### Pod to Pod Communication
-<pre>
-- When a Pod A sends traffic to Pod B, OVN handles the routing without needing kube-proxy
-- Packets flow through the overlay network
-- Both pods live on the same logical network namesapces, if even if they are on different nodes
-- The network plugin encapsulates packets and routes them to the correct node
-</pre>
-
-#### Services and Load Balancing
-<pre>
-- Services abstract pods IP addresses as Pod IPs are ephemeral
-- When you create a service, it gets a stable cluster IP
-- The kube-proxy watches endpoints and programs iptable rules on every node
-- The rules use DNAT with random probability-weighted distribution for new connections
-- each new connection picks a backend pod randomly according to their weights
-- Pod to Pod communication via Internal Service
-  - Pod A queries the service DNS name, gets resolved to cluster IP 
-  - Packtet hits a nodes's iptable rules
-  - DNAT rewrites the destination to a real Pod IP
-  - OVN routes to the target node and pod
-- Pod to Pod communication via External Route
-  - Uses Route or Ingress object
-  - Route creates a HAProxy rule on the ingress controller pods
-  - Traffic lands on the Ingress controller, which forwards to the service
-  - service load balancing takes over from there
-- Egress ( pod to external traffic )
-  - Pods use their Node's IP aas source 
-  - Outbound traffic appears to come from the cluster, not from individual pods
-</pre>
 
 
