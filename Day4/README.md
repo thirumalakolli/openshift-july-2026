@@ -112,3 +112,23 @@ oc get ingress
 curl http://tektutor.apps.ocp4.palmeto.org/hello
 curl http://tektutor.apps.ocp4.palmeto.org/nginx
 ```
+
+## Lab - How two microserives exchange data via Queue in a asynchronous fashion
+```
+oc delete project jegan
+oc new-project jegan
+
+oc new-app --name=jms-producer https://github.com/tektutor/openshift-july-2026.git --context-dir=Day4/jms-demo/producer --strategy=docker
+oc new-app --name=jms-consumer https://github.com/tektutor/openshift-july-2026.git --context-dir=Day4/jms-demo/consumer --strategy=docker
+
+oc logs -f buildconfig/jms-producer
+oc logs -f buildconfig/jms-consumer
+
+oc get pods
+
+# Terminal 1
+oc logs -f deploy/producer
+
+# Terminal 2
+oc logs -f deploy/consumer
+```
