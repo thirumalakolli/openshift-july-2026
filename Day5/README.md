@@ -821,3 +821,15 @@ ab -k -n 200000 -c 1000 https://nginx-jegan.apps.ocp4.palmeto.org/
 ![jenkins](img24.png)
 ![jenkins](img25.png)
 ![jenkins](img26.png)
+
+```
+cd ~/openshift-july-2026
+git pull
+cd Day5/CICD
+oc project jegan-project
+oc apply -f buildconfig.yml
+oc get buildconfigs
+oc start-build bc/java-app-pipeline
+
+oc logs -f bc/java-app-pipeline
+```
