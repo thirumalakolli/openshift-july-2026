@@ -831,8 +831,8 @@ oc apply -f buildconfig.yml
 oc get buildconfigs
 
 oc create imagestream hello-microservice
-
+oc policy add-role-to-user edit system:serviceaccount:jegan-project:default
 oc start-build bc/java-app-pipeline
 
-oc logs -f bc/java-app-pipeline
+oc logs -f bc/java-app-pipeline 
 ```
