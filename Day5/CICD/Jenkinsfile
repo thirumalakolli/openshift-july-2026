@@ -1,0 +1,101 @@
+pipeline {
+    agent {
+        kubernetes {
+            yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: java-agent
+    image: registry.access.redhat.com/ubi8/openjdk-17:latest
+    command: ['cat']
+    tty: true
+    volumeMounts:
+    - name: m2-cache
+      mountPath: /home/jenkins/.m2
+  - name: oc-client
+    image: quay.io/openshift/origin-cli:latest
+    command: ['cat']
+    tty: true
+  volumes:
+  - name: m2-cache
+    emptyDir: {}
+"""
+        }
+    }
+
+    environment {
+        APP_NAME = "hello-microservice"
+        // This must match the 'metadata.name' in your hello-deploy.yml
+        DEPLOYMENT_NAME = "hello-microservice"
+        PROJECT_DIR = "Day5/CICD/hello-springboot-microservice"
+    }
+
+    stages {
+        stage('Compile & Package') {
+            steps {
+                container('java-agent') {
+                    dir("${env.PROJECT_DIR}") {
+                        sh "mvn clean package -DskipTests"
+                        sh "ls -ld target" 
+                    } 
+                }
+            }
+        }
+
+        stage('Build Custom Image') {
+            steps {
+                container('oc-client') {
+                    script {
+                        dir("${env.PROJECT_DIR}") {
+                            openshift.withCluster() {
+                                openshift.withProject() {
+                                    if (!openshift.selector("bc", "${APP_NAME}-binary").exists()) {
+                                        echo "Creating Binary BuildConfig..."
+                                        openshift.newBuild("--name=${APP_NAME}-binary", "--strategy=source", "--binary=true", "--image=registry.access.redhat.com/ubi8/openjdk-17:latest")
+                                    }
+
+                                    echo "Uploading target folder to OpenShift..."
+                                    openshift.selector("bc", "${APP_NAME}-binary").startBuild("--from-dir=target/", "--wait")
+                            
+                                    def tag = "build-${env.BUILD_NUMBER}"
+                                    openshift.tag("${APP_NAME}-binary:latest", "${APP_NAME}:${tag}")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to OpenShift') {
+            steps {
+                container('oc-client') {
+                    script {
+                        openshift.withCluster() {
+                            openshift.withProject() {
+                                // Resolves the 'error: no project has been set' issue
+                                def namespace = openshift.project() 
+                                
+                                dir("Day5/CICD/openshift") {
+                                    sh "oc apply -f hello-deploy.yml"
+                                    sh "oc apply -f hello-service.yml"
+                                    sh "oc apply -f hello-route.yml"
+                                }
+
+                                def tag = "build-${env.BUILD_NUMBER}"
+                                def registry = "image-registry.openshift-image-registry.svc:5000"
+                                
+                                // Explicitly update the deployment with the new image
+                                sh "oc set image deployment/${env.DEPLOYMENT_NAME} ${env.DEPLOYMENT_NAME}=${registry}/${namespace}/${APP_NAME}:${tag}"
+                                
+                                // Wait for rollout to finish
+                                openshift.selector("deployment", "${env.DEPLOYMENT_NAME}").rollout().status()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

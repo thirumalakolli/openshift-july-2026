@@ -1,0 +1,81 @@
+---
+# Deployment: runs the container, with liveness and readiness probes wired
+# to the Spring Boot Actuator health groups.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: greeting-service
+  labels:
+    app: greeting-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: greeting-service
+  template:
+    metadata:
+      labels:
+        app: greeting-service
+    spec:
+      containers:
+        - name: greeting-service
+          # Replace with the image your build produced, e.g. the internal
+          # registry path: image-registry.openshift-image-registry.svc:5000/<project>/greeting-service:latest
+          image: greeting-service:latest
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          # Readiness: don't send traffic until the app reports ready.
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          # Liveness: restart the pod if the JVM stops responding.
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+# Service: stable cluster-internal address that load-balances across pods.
+apiVersion: v1
+kind: Service
+metadata:
+  name: greeting-service
+  labels:
+    app: greeting-service
+spec:
+  selector:
+    app: greeting-service
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+---
+# Route: exposes the Service outside the cluster over HTTPS (edge TLS).
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: greeting-service
+  labels:
+    app: greeting-service
+spec:
+  to:
+    kind: Service
+    name: greeting-service
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
