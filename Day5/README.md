@@ -794,3 +794,84 @@ ab -k -n 200000 -c 1000 https://nginx-jegan.apps.ocp4.palmeto.org/
 ```
 
 
+## Lab - CICD with Jenkins & Red Hat Openshift
+![jenkins](img1.png)
+![jenkins](img2.png)
+![jenkins](img3.png)
+![jenkins](img4.png)
+![jenkins](img5.png)
+![jenkins](img6.png)
+![jenkins](img7.png)
+![jenkins](img8.png)
+![jenkins](img9.png)
+![jenkins](img10.png)
+![jenkins](img11.png)
+![jenkins](img12.png)
+![jenkins](img13.png)
+![jenkins](img14.png)
+![jenkins](img15.png)
+![jenkins](img16.png)
+![jenkins](img17.png)
+![jenkins](img18.png)
+![jenkins](img19.png)
+![jenkins](img20.png)
+![jenkins](img21.png)
+![jenkins](img22.png)
+![jenkins](img23.png)
+![jenkins](img24.png)
+![jenkins](img25.png)
+![jenkins](img26.png)
+
+```
+cd ~/openshift-july-2026
+git pull
+cd Day5/CICD
+oc project jegan-project
+oc apply -f buildconfig.yml
+oc get buildconfigs
+
+oc create imagestream hello-microservice
+oc policy add-role-to-user edit system:serviceaccount:jegan-project:default
+oc start-build bc/java-app-pipeline
+
+oc logs -f bc/java-app-pipeline 
+```
+
+## Certifications Recommended
+
+#### Recommended for Developers
+<pre>
+- To prepare for EX288 Certification, you may attend the training that covers topics listed in 
+  Containers & Kubernetes Fundamentals (DO188) and Red Hat OpenShift Development II: Building Kubernetes Applications (DO288).
+- Red Hat doesn't mandate attending training before taking EX288 Certification, those who are technically hands-on will be able 
+  to clear the Certification with consistent preparation
+</pre>
+
+<pre>
+- Red Hat Certified Specialist in Containers (EX188)
+- Red Hat Certified Specialist in OpenShift Application Development (EX288)
+- Red Hat Certified Cloud-Native Developer (EX378) - Quarkus/Java Focused
+- Red Hat Certified Specialist in OpenShift AI (EX267)
+- Event-Driven Development (EX453 ) - Kafka/AMQ Streams
+- Building Resilient Microservices EX328 - Service Mesh/Istio
+</pre>
+
+#### Recommended for DevOps Engineers
+<pre>
+- Red Hat Certified Specialist in OpenShift Automation and Integration (EX380)
+- Red Hat Certified Cloud-Native Developer (RHCCD)
+- Red Hat Certified OpenShift Architect 
+- The Foundation: Red Hat Certified Engineer (EX294 - RHCE)
+- The Platform: EX288 (Developer) OR EX280 (Admin)
+- The Pipeline: EX288 (OpenShift Pipelines)
+- The Automation Pinnacle: Red Hat Certified Specialist in MultiCluster Management (EX480)
+</pre>
+
+#### Recommended for Administrators
+<pre>
+- Prerequisite: Red Hat Certified System Administrator (EX200 - RHCSA)
+- Core: Red Hat Certified Specialist in OpenShift Administration (EX280)
+- Advanced: Red Hat Certified Specialist in OpenShift Automation & Integration (EX380)
+- OpenShift Virtualization (EX316) - Running VMs alongside containers
+- OpenShift Data Foundation (EX370) - Managing cluster storage/ODF
+</pre>
