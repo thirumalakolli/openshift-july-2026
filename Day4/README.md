@@ -154,5 +154,5 @@ openssl x509 -req -in csr.csr -signkey key.key -out crt.crt
 oc create route edge --service nginx --hostname nginx-jegan.apps.ocp4.palmeto.org --key key.key --cert crt.crt
 
 oc get route
-curl -k --insecure https://nginx-jegan.apps.ocp4.palmeto.org
+curl --insecure https://nginx-jegan.apps.ocp4.palmeto.org
 ```
