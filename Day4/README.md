@@ -127,8 +127,8 @@ oc logs -f buildconfig/jms-consumer
 oc get pods
 
 # Terminal 1
-oc logs -f deploy/producer
+oc logs -f deploy/jms-producer
 
 # Terminal 2
-oc logs -f deploy/consumer
+oc logs -f deploy/jms-consumer
 ```
