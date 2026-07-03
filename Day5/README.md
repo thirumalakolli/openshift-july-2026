@@ -1,5 +1,18 @@
 # Day 5
 
+## Info - How many users one Pod can handle?
+<pre>
+- there is no fixed number
+- it depends on your application's per-request cost and its concurrency model
+- how to compute the concurrent cacacity
+  concurrent requests = ( throughput in req/sec ) x ( average request duration in sec )
+- if each request takes 200ms and one pod can support upto 250~500 request/second
+- Springboot application Pods about 200 concurrent requests
+- Tomcat can handle 10 concurrent database-bound requests
+- Benchmarking is the right way to find the number as concurrency depends on your application's ability
+  and how long it takes to respond a single request
+</pre>  
+
 ## Info - Openshift S2I
 <pre>
 - In Kubernetes, we can only deploy application using container images
