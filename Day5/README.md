@@ -875,15 +875,3 @@ oc logs -f bc/java-app-pipeline
 - OpenShift Virtualization (EX316) - Running VMs alongside containers
 - OpenShift Data Foundation (EX370) - Managing cluster storage/ODF
 </pre>
-
-## Kindly complete the post test and share your feedback at the below link and confirm over chat
-
-#### Post Assessment Link: 
-<pre>
-https://forms.office.com/r/1rPS5ipKVp
-</pre>
-
-#### Feedback Link
-<pre>
-https://forms.office.com/r/JvCNADJ8BN
-</pre>
