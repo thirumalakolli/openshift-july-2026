@@ -829,6 +829,9 @@ cd Day5/CICD
 oc project jegan-project
 oc apply -f buildconfig.yml
 oc get buildconfigs
+
+oc create imagestream hello-microservice
+
 oc start-build bc/java-app-pipeline
 
 oc logs -f bc/java-app-pipeline
