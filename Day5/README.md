@@ -837,13 +837,14 @@ oc start-build bc/java-app-pipeline
 oc logs -f bc/java-app-pipeline 
 ```
 
-## Post Assessment Link: 
+## Kindly complete the post test and share your feedback at the below link and confirm over chat
+
+#### Post Assessment Link: 
 <pre>
 https://forms.office.com/r/1rPS5ipKVp
 </pre>
 
-## Feedback Link
+#### Feedback Link
 <pre>
 https://forms.office.com/r/JvCNADJ8BN
 </pre>
- 
